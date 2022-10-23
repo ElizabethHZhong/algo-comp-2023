@@ -13,11 +13,26 @@ class User:
         self.grad_year = grad_year
         self.responses = responses
 
-
 # Takes in two user objects and outputs a float denoting compatibility
 def compute_score(user1, user2):
-    # YOUR CODE HERE
-    return 0
+    # if the one person's gender is not the other person's preference, 
+    # then they are not compatible at all, so the score should be 0.
+    if ((user1.gender not in user2.preferences) or 
+        (user2.gender not in user1.preferences)):
+        return 0
+    
+    # calculate the number of questions they answered the same
+    num_qs = len(user1.responses)
+    same_ans = 0
+    for q in range(num_qs):
+        if user1.responses[q] == user2.responses[q]:
+            same_ans += 1
+    
+    # the score is the percentage of questions they answered the same
+    score = same_ans / num_qs
+
+    return score
+    
 
 
 if __name__ == '__main__':
