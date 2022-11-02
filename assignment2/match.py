@@ -1,6 +1,25 @@
 import numpy as np
 from typing import List, Tuple
 
+# helper function: generate list of preferred genders 
+def get_pref_list(gender_pref, person):
+    pref = ["Nonbinary"]
+    if gender_pref[person] == "Men":
+        pref.append("Male")
+    elif gender_pref[person] == "Women":
+        pref.append("Female")
+    elif gender_pref[person] == "Bisexual":
+        pref.append("Male")
+        pref.append("Female")
+    return pref
+
+# helper function: check if two people match each others gender prefs
+def matches_prefs(gender_id, gender_pref, a, b):
+    a_prefs = get_pref_list(gender_pref, a)
+    b_prefs = get_pref_list(gender_pref, b)
+    return gender_id[a] in b_prefs and gender_id[b] in a_prefs
+    
+
 def run_matching(scores: List[List], gender_id: List, gender_pref: List) -> List[Tuple]:
     """
     TODO: Implement Gale-Shapley stable matching!
@@ -21,7 +40,31 @@ def run_matching(scores: List[List], gender_id: List, gender_pref: List) -> List
             - What data structure can you use to take advantage of this fact when forming your matches?
         - This is by no means an exhaustive list, feel free to reach out to us for more help!
     """
-    matches = [()]
+    N = len(scores) # total number of people
+    unmatched = list(range(N)) # initialize list of unmatched people
+    proposals = [[0 for j in range(N)] for i in range(N)] # list of list of people who've they've proposed to
+    matches = []
+
+    # every person has already rejected themselves
+    for person in range(N):
+        proposals[person][person] = 1
+
+    # loop through proposal matrix
+    for proposer in range(N):
+        for acceptor in range(N):
+            # if proposer is acceptor
+            if proposer == acceptor:
+                continue
+                
+            # the person we're trying to match has already proposed to this person
+            if proposals[proposer][acceptor] == 1:
+                continue
+            # gender-prefs match
+            elif matches_prefs(gender_id, gender_pref, proposer, acceptor):
+                # person is unmatched
+                if person in unmatched:
+                    matches.append((curr, person))
+
     return matches
 
 if __name__ == "__main__":
