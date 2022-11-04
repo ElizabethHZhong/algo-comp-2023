@@ -46,8 +46,6 @@ def run_matching(scores: List[List], gender_id: List, gender_pref: List) -> List
     match_pro = []
     match_acc = []
 
-    fully_proposed = [[1 for j in range(N)] for i in range(N)]
-
     # every person has already rejected themselves
     for person in range(N):
         proposals[person][person] = 1
@@ -72,8 +70,6 @@ def run_matching(scores: List[List], gender_id: List, gender_pref: List) -> List
                         match_pro.append(proposer)
                         match_acc.append(acceptor)
                         # remove them from unmatched
-                        print(unmatched)
-                        print(proposer)
                         unmatched.remove(proposer)
                         unmatched.remove(acceptor)
                         
@@ -130,5 +126,7 @@ if __name__ == "__main__":
             gender_preferences.append(curr)
 
     gs_matches, gs_unmatched = run_matching(raw_scores, genders, gender_preferences)
+    print("Matches: ", end="")
     print(gs_matches)
+    print("Unmatched: ", end="")
     print(gs_unmatched)
