@@ -43,7 +43,10 @@ def run_matching(scores: List[List], gender_id: List, gender_pref: List) -> List
     N = len(scores) # total number of people
     unmatched = list(range(N)) # initialize list of unmatched people
     proposals = [[0 for j in range(N)] for i in range(N)] # list of list of people who've they've proposed to
-    matches = []
+    match_pro = []
+    match_acc = []
+
+    fully_proposed = [[1 for j in range(N)] for i in range(N)]
 
     # every person has already rejected themselves
     for person in range(N):
@@ -51,21 +54,66 @@ def run_matching(scores: List[List], gender_id: List, gender_pref: List) -> List
 
     # loop through proposal matrix
     for proposer in range(N):
-        for acceptor in range(N):
-            # if proposer is acceptor
-            if proposer == acceptor:
-                continue
-                
-            # the person we're trying to match has already proposed to this person
-            if proposals[proposer][acceptor] == 1:
-                continue
-            # gender-prefs match
-            elif matches_prefs(gender_id, gender_pref, proposer, acceptor):
-                # person is unmatched
-                if person in unmatched:
-                    matches.append((curr, person))
+        if proposer in unmatched:
+            for acceptor in range(N):
+                # if proposer is acceptor, skip
+                if proposer == acceptor:
+                    continue
+                        
+                # the acceptor has rejected proposer before, skip
+                if proposals[proposer][acceptor] == 1:
+                    continue
 
-    return matches
+                # gender-prefs match
+                elif matches_prefs(gender_id, gender_pref, proposer, acceptor):
+                    # acceptor is unmatched
+                    if acceptor in unmatched:
+                        # add them to matches
+                        match_pro.append(proposer)
+                        match_acc.append(acceptor)
+                        # remove them from unmatched
+                        print(unmatched)
+                        print(proposer)
+                        unmatched.remove(proposer)
+                        unmatched.remove(acceptor)
+                        
+                    # acceptor is matched
+                    else:
+                        # acceptor proposed previously
+                        if acceptor in match_pro:
+                            # index of acceptor's current match
+                            match_idx = match_pro.index(acceptor) 
+                            # acceptor's current match
+                            curr_match = match_acc[match_idx] 
+
+                        # acceptor accepted previously
+                        elif acceptor in match_acc:
+                            # index of acceptor's current match
+                            match_idx = match_acc.index(acceptor) 
+                            # acceptor's current match
+                            curr_match = match_pro[match_idx] 
+
+                        # scores of acceptor and proposers
+                        curr_score = scores[acceptor][curr_match]
+                        new_score = scores[acceptor][proposer]
+
+                        # acceptor prefers proposer over current match
+                        if new_score > curr_score:
+                            # substitute previous match with new match
+                            match_pro[match_idx] = proposer
+                            match_acc[match_idx] = acceptor
+                            # remove proposer from unmatched
+                            unmatched.remove(proposer)
+                            unmatched.append(curr_match)
+                        
+                    # this match has been considered/proposal happened
+                    proposals[proposer][acceptor] = 1
+                    
+                # break out of proposer iteration once they have been matched
+                if proposer not in unmatched:
+                    break
+
+    return (list(zip(match_pro, match_acc)), unmatched)
 
 if __name__ == "__main__":
     raw_scores = np.loadtxt('raw_scores.txt').tolist()
@@ -81,4 +129,6 @@ if __name__ == "__main__":
             curr = line[:-1]
             gender_preferences.append(curr)
 
-    gs_matches = run_matching(raw_scores, genders, gender_preferences)
+    gs_matches, gs_unmatched = run_matching(raw_scores, genders, gender_preferences)
+    print(gs_matches)
+    print(gs_unmatched)
