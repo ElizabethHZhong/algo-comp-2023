@@ -108,7 +108,13 @@ def run_matching(scores: List[List], gender_id: List, gender_pref: List) -> List
                 # break out of proposer iteration once they have been matched
                 if proposer not in unmatched:
                     break
+    
+    # Returns a list of matched people and people unmatched.
+    # People are unmatched if they are incompatible with all unmatched people.
 
+    # In our algorithm, we consider every person with every person twice to
+    # confirm that two people are definitely not the best match.
+    # Thus, we prioritize better matches over matching everyone.
     return (list(zip(match_pro, match_acc)), unmatched)
 
 if __name__ == "__main__":
